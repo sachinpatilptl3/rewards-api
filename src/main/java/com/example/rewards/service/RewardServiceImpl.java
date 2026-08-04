@@ -5,6 +5,7 @@ import com.example.rewards.model.Transaction;
 import com.example.rewards.repositroy.TransactionRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,18 +21,24 @@ public class RewardServiceImpl implements RewardService {
     }
 
     @Override
-    public List<RewardSummaryDTO> getCustomerRewards() {
+    public RewardSummaryDTO getCustomerRewards(Long customerId,
+                                               LocalDate startDate,
+                                               LocalDate endDate) {
 
-        List<Transaction> transactions = transactionRepository.findAllTransactions();
-
-        Map<Long, List<Transaction>> customerMap =
-                transactions.stream()
-                        .collect(Collectors.groupingBy(Transaction::getCustomerId));
-
-        return customerMap.values()
+        List<Transaction> transactions = transactionRepository.findAllTransactions()
                 .stream()
-                .map(this::buildRewardSummary)
+                .filter(transaction ->
+                        transaction.getCustomerId().equals(customerId))
+                .filter(transaction ->
+                        !transaction.getTransactionDate().isBefore(startDate)
+                                && !transaction.getTransactionDate().isAfter(endDate))
                 .collect(Collectors.toList());
+
+        if (transactions.isEmpty()) {
+            throw new RuntimeException("No transactions found for customer.");
+        }
+
+        return buildRewardSummary(transactions);
     }
 
     private RewardSummaryDTO buildRewardSummary(List<Transaction> transactions) {
@@ -75,5 +82,4 @@ public class RewardServiceImpl implements RewardService {
 
         return (int) ((amount - 100) * 2 + 50);
     }
-
 }

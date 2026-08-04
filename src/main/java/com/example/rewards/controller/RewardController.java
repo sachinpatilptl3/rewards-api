@@ -3,11 +3,9 @@ package com.example.rewards.controller;
 import com.example.rewards.dto.RewardSummaryDTO;
 import com.example.rewards.service.RewardService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import java.time.LocalDate;
 
 @RestController
 @RequestMapping("/api/rewards")
@@ -19,10 +17,14 @@ public class RewardController {
         this.rewardService = rewardService;
     }
 
-    @GetMapping
-    public ResponseEntity<List<RewardSummaryDTO>> getRewards() {
+    @GetMapping("/{customerId}")
+    public ResponseEntity<RewardSummaryDTO> getCustomerRewards(
+            @PathVariable Long customerId,
+            @RequestParam LocalDate startDate,
+            @RequestParam LocalDate endDate) {
 
-        return ResponseEntity.ok(rewardService.getCustomerRewards());
-
+        return ResponseEntity.ok(
+                rewardService.getCustomerRewards(customerId, startDate, endDate)
+        );
     }
 }

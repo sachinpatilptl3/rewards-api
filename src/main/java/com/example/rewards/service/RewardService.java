@@ -2,10 +2,13 @@ package com.example.rewards.service;
 
 import com.example.rewards.dto.RewardSummaryDTO;
 
-import java.util.List;
+import java.time.LocalDate;
 
 public interface RewardService {
 
-    List<RewardSummaryDTO> getCustomerRewards();
+    RewardSummaryDTO getCustomerRewards(
+            Long customerId,
+            LocalDate startDate,
+            LocalDate endDate);
 
 }
