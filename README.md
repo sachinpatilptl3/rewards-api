@@ -1,156 +1,220 @@
-# Rewards Program API
+# Customer Rewards API
 
 ## Overview
 
-This project is a Spring Boot REST API that calculates reward points for customers based on their purchases.
+The Customer Rewards API is a Spring Boot REST application that calculates reward points for customers based on their purchase transactions.
 
-The API calculates reward points earned by a customer over a specified date range and provides both monthly and total reward points.
+The application uses:
 
-## Reward Calculation
-
-The reward rules are:
-
-- No points for purchases up to $50.
-- 1 point for every dollar spent between $50 and $100.
-- 2 points for every dollar spent above $100.
-
-### Example
-
-Purchase Amount: $120
-
-Reward Points:
-
-- 50 points for the amount between $50 and $100.
-- 40 points for the amount above $100.
-
-Total = 90 Reward Points
-
----
-
-## Technologies Used
-
-- Java 17+ (or your Java version)
-- Spring Boot
+- Spring Boot 3.5.3
+- Spring Data JPA
+- H2 In-Memory Database
 - Maven
-- Lombok
-- Java Streams
+- Java 17
 
 ---
 
-## Project Structure
+# Architecture Diagram
 
 ```
-src
- ├── controller
- ├── dto
- ├── model
- ├── repository
- ├── service
- └── RewardsApplication
+                    +----------------------+
+                    |      Client          |
+                    | (Postman / Browser)  |
+                    +----------+-----------+
+                               |
+                               |
+                               v
+                 +-----------------------------+
+                 |     RewardController        |
+                 +-------------+---------------+
+                               |
+                               |
+                               v
+                 +-----------------------------+
+                 |     RewardServiceImpl       |
+                 +-------------+---------------+
+                               |
+                               |
+                               v
+                 +-----------------------------+
+                 |  TransactionRepository      |
+                 +-------------+---------------+
+                               |
+                               |
+                               v
+                      +------------------+
+                      |   H2 Database    |
+                      +------------------+
 ```
 
 ---
 
-## Prerequisites
+# Design
 
-- Java JDK
-- Maven
-- IntelliJ IDEA (or any Java IDE)
+The application follows a layered architecture.
 
----
+- Controller Layer
+    - Handles HTTP requests.
+    - Validates request parameters.
 
-## Setup
+- Service Layer
+    - Implements reward calculation logic.
+    - Builds response DTOs.
 
-Clone the repository
+- Repository Layer
+    - Retrieves transaction data using Spring Data JPA.
 
-```
-git clone <your-github-url>
-```
+- Utility Layer
+    - Calculates reward points.
 
-Move to project folder
-
-```
-cd rewards
-```
-
-Build the project
-
-```
-mvn clean install
-```
-
-Run the application
-
-```
-mvn spring-boot:run
-```
-
-Or run `RewardsApplication.java` from your IDE.
+- Exception Layer
+    - Provides centralized exception handling using `@ControllerAdvice`.
 
 ---
 
-## API Endpoint
-
-### Get Customer Rewards
+# API Endpoint
 
 ```
-GET /api/rewards/{customerId}
+GET /api/rewards/customers/{customerId}/rewards
 ```
 
-### Request Parameters
+---
 
-| Parameter | Description |
-|----------|-------------|
-| customerId | Customer ID |
-| startDate | Start Date (yyyy-MM-dd) |
-| endDate | End Date (yyyy-MM-dd) |
-
-### Example Request
+# Sample Request
 
 ```
-GET http://localhost:8080/api/rewards/101?startDate=2025-01-01&endDate=2025-03-31
+GET http://localhost:8080/api/rewards/customers/101/rewards?startDate=2025-01-01&endDate=2025-03-31
 ```
 
-### Example Response
+---
+
+# Sample Success Response
 
 ```json
 {
-  "customerId":101,
-  "customerName":"John",
-  "monthlyRewards":{
-    "JANUARY":115,
-    "FEBRUARY":250
-  },
-  "totalRewards":365
+  "customerId": 101,
+  "customerName": "John Doe",
+  "monthlyRewards": [
+    {
+      "year": 2025,
+      "month": "January",
+      "points": 90
+    },
+    {
+      "year": 2025,
+      "month": "February",
+      "points": 30
+    }
+  ],
+  "transactions": [
+    {
+      "transactionDate": "2025-01-10",
+      "amount": 120.00,
+      "points": 90
+    },
+    {
+      "transactionDate": "2025-02-15",
+      "amount": 80.00,
+      "points": 30
+    }
+  ],
+  "totalRewards": 120
 }
 ```
 
 ---
 
-## Assumptions
+# Sample Error Response
 
-- Transaction data is hardcoded for demonstration.
-- Reward points are calculated per transaction.
-- Date range is inclusive.
-- Customer IDs are unique.
-- The application does not use a database.
+```json
+{
+  "timestamp": "2026-08-07T14:30:00",
+  "status": 400,
+  "error": "Bad Request",
+  "message": "startDate must not be after endDate"
+}
+```
+
+Example:
+
+```
+GET /api/rewards/customers/101/rewards?startDate=2025-04-01&endDate=2025-01-01
+```
 
 ---
 
-## Design Decisions
+# Build Instructions
 
-- Used layered architecture (Controller → Service → Repository).
-- Used DTOs to separate API responses from the data model.
-- Used Java Streams for grouping transactions by month.
-- Used constructor injection for dependency injection.
-- Repository returns sample data to demonstrate the solution without requiring a database.
+Clone the repository
+
+```bash
+git clone <repository-url>
+```
+
+Move to the project directory
+
+```bash
+cd rewards
+```
+
+Compile the project
+
+```bash
+./mvnw clean compile
+```
+
+Run the application
+
+```bash
+./mvnw spring-boot:run
+```
 
 ---
 
-## Future Enhancements
+# Running Tests
 
-- Integrate with a relational database (PostgreSQL/MySQL).
-- Add unit and integration tests.
-- Add exception handling using `@ControllerAdvice`.
-- Improve month formatting (e.g., January instead of JANUARY).
-- Add pagination and customer search.
+Run all unit tests
+
+```bash
+./mvnw test
+```
+
+or
+
+```bash
+./mvnw clean test
+```
+
+Successful execution should display:
+
+```
+BUILD SUCCESS
+```
+
+---
+
+# H2 Database
+
+Console URL
+
+```
+http://localhost:8080/h2-console
+```
+
+JDBC URL
+
+```
+jdbc:h2:mem:testdb
+```
+
+Username
+
+```
+sa
+```
+
+Password
+
+```
+(blank)
+```

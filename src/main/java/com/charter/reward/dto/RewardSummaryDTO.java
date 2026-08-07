@@ -1,56 +1,48 @@
 package com.charter.reward.dto;
 
-import java.util.Map;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+import java.util.List;
+
+/**
+ * Represents the reward summary for a customer.
+ * <p>
+ * Contains customer information, monthly reward points,
+ * transaction-level reward details, and total reward points.
+ */
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class RewardSummaryDTO {
 
+    /**
+     * Customer identifier.
+     */
     private Long customerId;
+
+    /**
+     * Customer name.
+     */
     private String customerName;
-    private Map<String, Integer> monthlyRewards;
+
+    /**
+     * Monthly reward summary.
+     */
+    private List<MonthlyRewardDTO> monthlyRewards;
+
+    /**
+     * Reward details for each transaction.
+     */
+    private List<TransactionRewardDTO> transactions;
+
+    /**
+     * Total reward points earned.
+     */
     private Integer totalRewards;
-
-    public RewardSummaryDTO() {
-    }
-
-    public RewardSummaryDTO(Long customerId,
-                            String customerName,
-                            Map<String, Integer> monthlyRewards,
-                            Integer totalRewards) {
-        this.customerId = customerId;
-        this.customerName = customerName;
-        this.monthlyRewards = monthlyRewards;
-        this.totalRewards = totalRewards;
-    }
-
-    public Long getCustomerId() {
-        return customerId;
-    }
-
-    public void setCustomerId(Long customerId) {
-        this.customerId = customerId;
-    }
-
-    public String getCustomerName() {
-        return customerName;
-    }
-
-    public void setCustomerName(String customerName) {
-        this.customerName = customerName;
-    }
-
-    public Map<String, Integer> getMonthlyRewards() {
-        return monthlyRewards;
-    }
-
-    public void setMonthlyRewards(Map<String, Integer> monthlyRewards) {
-        this.monthlyRewards = monthlyRewards;
-    }
-
-    public Integer getTotalRewards() {
-        return totalRewards;
-    }
-
-    public void setTotalRewards(Integer totalRewards) {
-        this.totalRewards = totalRewards;
-    }
 }

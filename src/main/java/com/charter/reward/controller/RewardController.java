@@ -11,6 +11,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 
+/**
+ * REST controller for customer reward-related APIs.
+ */
 @RestController
 @RequestMapping("/api/rewards")
 @Validated
@@ -18,10 +21,23 @@ public class RewardController {
 
     private final RewardService rewardService;
 
+    /**
+     * Creates a RewardController with the required RewardService.
+     *
+     * @param rewardService service used to calculate customer rewards
+     */
     public RewardController(RewardService rewardService) {
         this.rewardService = rewardService;
     }
 
+    /**
+     * Returns the reward summary for a customer within the specified date range.
+     *
+     * @param customerId the customer identifier
+     * @param startDate the start date of the reward calculation period
+     * @param endDate the end date of the reward calculation period
+     * @return ResponseEntity containing the customer reward summary
+     */
     @GetMapping("/customers/{customerId}/rewards")
     public ResponseEntity<RewardSummaryDTO> getCustomerRewards(
 
