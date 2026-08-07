@@ -1,6 +1,6 @@
-package com.example.rewards.service;
+package com.charter.reward.service;
 
-import com.example.rewards.dto.RewardSummaryDTO;
+import com.charter.reward.dto.RewardSummaryDTO;
 
 import java.time.LocalDate;
 

@@ -1,8 +1,10 @@
-package com.example.rewards.service;
+package com.charter.reward.service;
 
-import com.example.rewards.dto.RewardSummaryDTO;
-import com.example.rewards.model.Transaction;
-import com.example.rewards.repositroy.TransactionRepository;
+import com.charter.reward.dto.RewardSummaryDTO;
+import com.charter.reward.exception.CustomerNotFoundException;
+import com.charter.reward.model.Transaction;
+import com.charter.reward.repository.TransactionRepository;
+import com.charter.reward.util.RewardUtil;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -25,7 +27,7 @@ public class RewardServiceImpl implements RewardService {
                                                LocalDate startDate,
                                                LocalDate endDate) {
 
-        List<Transaction> transactions = transactionRepository.findAllTransactions()
+        List<Transaction> transactions = transactionRepository.findAll()
                 .stream()
                 .filter(transaction ->
                         transaction.getCustomerId().equals(customerId))
@@ -35,7 +37,8 @@ public class RewardServiceImpl implements RewardService {
                 .collect(Collectors.toList());
 
         if (transactions.isEmpty()) {
-            throw new RuntimeException("No transactions found for customer.");
+            throw new CustomerNotFoundException(
+                    "No transactions found for customer " + customerId);
         }
 
         return buildRewardSummary(transactions);
@@ -53,33 +56,19 @@ public class RewardServiceImpl implements RewardService {
                                         .name(),
                                 LinkedHashMap::new,
                                 Collectors.summingInt(transaction ->
-                                        calculateRewardPoints(transaction.getAmount()))
+                                        RewardUtil.calculateRewardPoints(transaction.getAmount()))
                         ));
 
-        int totalRewards =
-                monthlyRewards.values()
-                        .stream()
-                        .mapToInt(Integer::intValue)
-                        .sum();
+        int totalRewards = monthlyRewards.values()
+                .stream()
+                .mapToInt(Integer::intValue)
+                .sum();
 
-        return RewardSummaryDTO.builder()
-                .customerId(first.getCustomerId())
-                .customerName(first.getCustomerName())
-                .monthlyRewards(monthlyRewards)
-                .totalRewards(totalRewards)
-                .build();
-    }
-
-    private int calculateRewardPoints(Double amount) {
-
-        if (amount <= 50) {
-            return 0;
-        }
-
-        if (amount <= 100) {
-            return (int) (amount - 50);
-        }
-
-        return (int) ((amount - 100) * 2 + 50);
+        return new RewardSummaryDTO(
+                first.getCustomerId(),
+                first.getCustomerName(),
+                monthlyRewards,
+                totalRewards
+        );
     }
 }
